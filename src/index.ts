@@ -1,5 +1,3 @@
-const hello = (message: string) => {
-    console.log(message);
-}
+import {ImageLoader} from "./components/ImageLoader";
 
-export {hello}
+export {ImageLoader}
