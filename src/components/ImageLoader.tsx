@@ -24,7 +24,28 @@ export const ImageLoader = (props: IImageLoader) => {
             image.src = blobUrl;
 
             image.onload = () => {
-                ctx?.drawImage(image, 0, 0, canvasRef.current!.width, canvasRef.current!.height)
+
+                let koef : number;
+                let width : number = image.width;
+                let height : number = image.height;
+
+                if(image.height > image.width)
+                {
+                    koef = canvasRef.current!.height / image.height;
+                    width *= koef;
+                    height = canvasRef.current!.height;
+                }
+                else
+                {
+                    koef = canvasRef.current!.width / image.width;
+                    height *= koef;
+                    width = canvasRef.current!.width;
+                }
+
+                canvasRef.current!.width = width;
+                canvasRef.current!.height = height;
+
+                ctx?.drawImage(image, 0, 0, width, height);
             }
         }
 
