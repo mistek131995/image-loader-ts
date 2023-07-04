@@ -1,9 +1,19 @@
-import React, {useEffect, useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {IImageLoader} from "./IImageLoader";
 
 export const ImageLoader = (props: IImageLoader) => {
     const divRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [crop, setCrop] = useState<Crop>({
+        firstPoint: {
+            x: 0,
+            y: 0
+        },
+        secondPoint: {
+            x: 0,
+            y: 0
+        }
+    })
 
     useEffect(() => {
         const width = divRef.current?.offsetWidth || 300;
@@ -11,6 +21,20 @@ export const ImageLoader = (props: IImageLoader) => {
 
         canvasRef.current!.width = width;
         canvasRef.current!.height = height;
+
+        canvasRef.current!.addEventListener("mousedown", (event: MouseEvent) => {
+            setCrop({...crop, firstPoint: {x: event.x, y: event.y}})
+
+            console.log("down")
+
+            canvasRef.current!.addEventListener("mouseup", (event: MouseEvent) => {
+                setCrop({...crop, secondPoint: {x: event.x, y: event.y}})
+
+                console.log("up")
+            })
+        })
+
+        console.log("render")
 
     }, [divRef, canvasRef])
 
@@ -25,24 +49,10 @@ export const ImageLoader = (props: IImageLoader) => {
 
             image.onload = () => {
 
-                let koef : number;
-                let width : number = image.width;
-                let height : number = image.height;
+                let koef : number = canvasRef.current!.width / image.width;
+                let width : number = canvasRef.current!.width;
+                let height : number = image.height * koef;
 
-                if(image.height > image.width)
-                {
-                    koef = canvasRef.current!.height / image.height;
-                    width *= koef;
-                    height = canvasRef.current!.height;
-                }
-                else
-                {
-                    koef = canvasRef.current!.width / image.width;
-                    height *= koef;
-                    width = canvasRef.current!.width;
-                }
-
-                canvasRef.current!.width = width;
                 canvasRef.current!.height = height;
 
                 ctx?.drawImage(image, 0, 0, width, height);
@@ -51,10 +61,23 @@ export const ImageLoader = (props: IImageLoader) => {
 
     },[props.imageFile])
 
+    // useEffect(() => {
+    //     console.log(crop)
+    // },  [crop])
 
     return <div ref={divRef} style={{width: "100%", height: "100%"}}>
         <canvas ref={canvasRef}>
             {props.canvasNotSupportMessage}
         </canvas>
     </div>
+}
+
+type Crop = {
+    firstPoint: Position,
+    secondPoint: Position
+}
+
+type Position = {
+    x: number,
+    y: number
 }
